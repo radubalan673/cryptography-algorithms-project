@@ -1,0 +1,64 @@
+#Implementare AES
+!pip install pycryptodome
+
+from Crypto.Cipher import AES
+import base64
+
+#pad textul cu spatiiile adaugate
+def pad(text):
+  while len(text) %16 !=0:
+    text += " "
+  return text
+
+def aes_encrypt(plain_text, key):
+  cipher = AES.new(key, AES.MODE_ECB)
+  padded_text = pad(plain_text).encode()
+  encrypted_text = cipher.encrypt(padded_text)
+  return base64.b64encode(encrypted_text).decode()
+
+def aes_decrypt(encrypted_text, key):
+  cipher = AES.new(key, AES.MODE_ECB)
+  decrypted_text = cipher.decrypt(base64.b64decode(encrypted_text))
+  return decrypted_text.decode().strip()
+
+key = b'1234567890ABCDEF'
+mesaj = "SECURITATEA E IMPORTANTA" #textul trebuie convertit la litere mari
+encrypted_text = aes_encrypt(mesaj, key)
+decrypted_text = aes_decrypt(encrypted_text, key)
+
+print(f"Text criptat: {encrypted_text}")
+print(f"Text decriptat: {decrypted_text}")
+
+#Implementare AES cu CBC si IV aleatoriu
+from Crypto.Cipher import AES
+import base64
+import os
+
+def pad(text):
+  while len(text) %16 !=0:
+    text += " "
+  return text
+
+def aes_encrypt(plain_text, key):
+    iv = os.urandom(16)
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    padded_text = pad(plain_text).encode()
+    encrypted_text = cipher.encrypt(padded_text)
+    return base64.b64encode(iv + encrypted_text).decode()
+
+def aes_decrypt(encrypted_text, key):
+    encrypted_data = base64.b64decode(encrypted_text)
+    iv = encrypted_data[0:16]
+    encrypted_text = encrypted_data[16:]
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    decrypted_text = cipher.decrypt(encrypted_text)
+    return decrypted_text.decode().strip()
+
+key = b'1234567890ABCDEF'
+mesaj = "SECURITATEA E IMPORTANTA"
+
+encrypted_text = aes_encrypt(mesaj.upper(), key)
+decrypted_text = aes_decrypt(encrypted_text, key)
+
+print(f"Text criptat: {encrypted_text}")
+print(f"Text decriptat: {decrypted_text}")
